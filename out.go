@@ -49,7 +49,7 @@ func Put(request PutRequest, manager Github, inputDir string) (*PutResponse, err
                 return nil, fmt.Errorf("failed to set target url file: %s", err)
             }
         } else {
-            if err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(targetURL), p.Description); err != nil {
+            if err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(p.targetURL), p.Description); err != nil {
                 return nil, fmt.Errorf("failed to set target url file: %s", err)
             }
         }
