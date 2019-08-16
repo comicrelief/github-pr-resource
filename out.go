@@ -43,13 +43,15 @@ func Put(request PutRequest, manager Github, inputDir string) (*PutResponse, err
             if err != nil {
                 return nil, fmt.Errorf("failed to read target url file: %s", err)
             }
-            targetURL := string(content)
+            newTargetURL := string(content)
 
+            if err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(newTargetURL), p.Description); err != nil {
+                return nil, fmt.Errorf("failed to set target url file: %s", err)
+            }
+        } else {
             if err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(targetURL), p.Description); err != nil {
                 return nil, fmt.Errorf("failed to set target url file: %s", err)
             }
-        } else err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(p.TargetURL), p.Description); err != nil {
-			return nil, fmt.Errorf("failed to set status: %s", err)
         }
 	}
 
