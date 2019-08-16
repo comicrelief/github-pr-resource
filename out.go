@@ -38,9 +38,19 @@ func Put(request PutRequest, manager Github, inputDir string) (*PutResponse, err
 
 	// Set status if specified
 	if p := request.Params; p.Status != "" {
-		if err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(p.TargetURL), p.Description); err != nil {
+        if p := request.Params; p.TargetURLFile != "" {
+            content, err := ioutil.ReadFile(filepath.Join(inputDir, p.TargetURLFile))
+            if err != nil {
+                return nil, fmt.Errorf("failed to read target url file: %s", err)
+            }
+            targetURL := string(content)
+
+            if err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(targetURL), p.Description); err != nil {
+                return nil, fmt.Errorf("failed to set target url file: %s", err)
+            }
+        } else err := manager.UpdateCommitStatus(version.Commit, p.BaseContext, p.Context, p.Status, os.ExpandEnv(p.TargetURL), p.Description); err != nil {
 			return nil, fmt.Errorf("failed to set status: %s", err)
-		}
+        }
 	}
 
 	// Set comment if specified
@@ -86,14 +96,15 @@ type PutResponse struct {
 
 // PutParameters for the resource.
 type PutParameters struct {
-	Path        string `json:"path"`
-	BaseContext string `json:"base_context"`
-	Context     string `json:"context"`
-	TargetURL   string `json:"target_url"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
-	CommentFile string `json:"comment_file"`
-	Comment     string `json:"comment"`
+	Path            string `json:"path"`
+	BaseContext     string `json:"base_context"`
+	Context         string `json:"context"`
+	TargetURL       string `json:"target_url"`
+    TargetURLFile   string `json:"target_url_file"`
+	Description     string `json:"description"`
+	Status          string `json:"status"`
+	CommentFile     string `json:"comment_file"`
+	Comment         string `json:"comment"`
 }
 
 // Validate the put parameters.
